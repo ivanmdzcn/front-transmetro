@@ -22,8 +22,8 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # IMPORTANTE: Ruta basada en tu angular.json
-# El nuevo builder pone los archivos en dist/clinica-frontend/browser
-COPY --from=build /app/dist/clinica-frontend/browser /usr/share/nginx/html
+# El nuevo builder pone los archivos en dist/pf_front/browser
+COPY --from=build /app/dist/pf_front/browser /usr/share/nginx/html
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
