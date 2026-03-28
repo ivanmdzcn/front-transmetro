@@ -1,0 +1,43 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center mb-4 gap-2">
+    <a routerLink="/buses" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h4 class="mb-0">Historial de parqueos — Bus #{{ idBus }}</h4>
+  </div>
+
+  @if (errorMsg) {
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+  }
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      @if (loading) {
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+      } @else if (historial.length === 0) {
+        <p class="text-center text-muted py-4 mb-0">No hay registros de cambios de parqueo.</p>
+      } @else {
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Parqueo anterior</th>
+              <th>Parqueo nuevo</th>
+              <th>Usuario</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of historial; track h.idHistorial) {
+              <tr>
+                <td>{{ h.fechaCambio | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ h.nombreParqueoAnterior ?? '—' }}</td>
+                <td>{{ h.nombreParqueoNuevo ?? '—' }}</td>
+                <td>{{ h.nombreUsuario ?? h.idUsuario }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>

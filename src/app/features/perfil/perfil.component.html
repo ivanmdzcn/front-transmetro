@@ -1,0 +1,177 @@
+﻿<!-- Loading -->
+<div *ngIf="loading" class="text-center py-5">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p class="mt-2 text-muted">Cargando perfil...</p>
+</div>
+
+<!-- Error -->
+<div *ngIf="errorMsg" class="alert alert-danger">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMsg }}
+</div>
+
+<!-- Perfil -->
+<ng-container *ngIf="perfil && !loading">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold text-primary mb-0">
+      <i class="bi bi-person-circle me-2"></i>Mi perfil
+    </h1>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Tarjeta principal -->
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm text-center p-4">
+        <div class="avatar-lg mx-auto mb-3">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <h5 class="fw-bold mb-1">{{ perfil.nombre }}</h5>
+        <span class="badge bg-primary-subtle text-primary fs-6 mb-2">
+          {{ perfil.rol ?? 'Sin rol' }}
+        </span>
+        <p class="text-muted small mb-0">{{ perfil.email }}</p>
+      </div>
+    </div>
+
+    <!-- Detalle -->
+    <div class="col-12 col-lg-8 d-flex flex-column gap-4">
+
+      <!-- Datos personales -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom fw-semibold">
+          <i class="bi bi-info-circle me-2 text-secondary"></i>Informacion personal
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-muted fw-normal">ID</dt>
+            <dd class="col-sm-8">{{ perfil.id }}</dd>
+
+            <dt class="col-sm-4 text-muted fw-normal">Nombre</dt>
+            <dd class="col-sm-8">{{ perfil.nombre }}</dd>
+
+            <dt class="col-sm-4 text-muted fw-normal">Usuario</dt>
+            <dd class="col-sm-8">{{ perfil.nombreUsuario }}</dd>
+
+            <dt class="col-sm-4 text-muted fw-normal">Email</dt>
+            <dd class="col-sm-8">{{ perfil.email }}</dd>
+
+            <dt class="col-sm-4 text-muted fw-normal">Rol</dt>
+            <dd class="col-sm-8">
+              <span class="badge bg-success-subtle text-success">{{ perfil.rol ?? 'Sin rol' }}</span>
+            </dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Permisos -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom fw-semibold">
+          <i class="bi bi-key me-2 text-secondary"></i>Permisos asignados
+          <span class="badge bg-secondary ms-2">{{ perfil.permisos.length }}</span>
+        </div>
+        <div class="card-body">
+          <div *ngIf="perfil.permisos.length === 0" class="text-muted small">
+            Sin permisos asignados.
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <span
+              *ngFor="let p of perfil.permisos"
+              class="badge bg-light text-dark border"
+            >
+              <i class="bi bi-shield-check me-1 text-success"></i>{{ p }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Cambio de contraseña -->
+  <div class="row mt-4">
+    <div class="col-12 col-lg-8 offset-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom fw-semibold">
+          <i class="bi bi-lock me-2 text-secondary"></i>Cambiar contraseña
+        </div>
+        <div class="card-body">
+
+          <div *ngIf="passError" class="alert alert-danger py-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ passError }}
+          </div>
+          <div *ngIf="passExito" class="alert alert-success py-2">
+            <i class="bi bi-check-circle me-2"></i>{{ passExito }}
+          </div>
+
+          <form [formGroup]="passForm" (ngSubmit)="cambiarContrasena()" class="row g-3">
+
+            <!-- Contraseña actual -->
+            <div class="col-12">
+              <label class="form-label fw-semibold">Contraseña actual <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input formControlName="contrasenaActual"
+                       [type]="mostrarActual ? 'text' : 'password'"
+                       class="form-control"
+                       [ngClass]="{'is-invalid': isPassInvalid('contrasenaActual')}"
+                       placeholder="Ingresa tu contraseña actual" autocomplete="current-password" />
+                <button type="button" class="btn btn-outline-secondary" (click)="mostrarActual = !mostrarActual">
+                  <i class="bi" [ngClass]="mostrarActual ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+                <div class="invalid-feedback">La contraseña actual es requerida.</div>
+              </div>
+            </div>
+
+            <!-- Nueva contraseña -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nueva contraseña <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input formControlName="contrasenaNueva"
+                       [type]="mostrarNueva ? 'text' : 'password'"
+                       class="form-control"
+                       [ngClass]="{'is-invalid': isPassInvalid('contrasenaNueva')}"
+                       placeholder="Mín. 6 caracteres" autocomplete="new-password" />
+                <button type="button" class="btn btn-outline-secondary" (click)="mostrarNueva = !mostrarNueva">
+                  <i class="bi" [ngClass]="mostrarNueva ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+                <div class="invalid-feedback">
+                  <span *ngIf="passForm.get('contrasenaNueva')?.errors?.['required']">La nueva contraseña es requerida.</span>
+                  <span *ngIf="passForm.get('contrasenaNueva')?.errors?.['minlength']">Mínimo 6 caracteres.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Confirmar contraseña -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Confirmar contraseña <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input formControlName="confirmarContrasena"
+                       [type]="mostrarConfirma ? 'text' : 'password'"
+                       class="form-control"
+                       [ngClass]="{'is-invalid': isPassInvalid('confirmarContrasena') || (passForm.errors?.['noCoinciden'] && passForm.get('confirmarContrasena')?.touched)}"
+                       placeholder="Repite la nueva contraseña" autocomplete="new-password" />
+                <button type="button" class="btn btn-outline-secondary" (click)="mostrarConfirma = !mostrarConfirma">
+                  <i class="bi" [ngClass]="mostrarConfirma ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+                <div class="invalid-feedback">
+                  <span *ngIf="passForm.get('confirmarContrasena')?.errors?.['required']">Debes confirmar la contraseña.</span>
+                  <span *ngIf="passForm.errors?.['noCoinciden'] && passForm.get('confirmarContrasena')?.touched">Las contraseñas no coinciden.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary" [disabled]="passGuardando">
+                <span *ngIf="passGuardando" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!passGuardando" class="bi bi-lock-fill me-1"></i>
+                Cambiar contraseña
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

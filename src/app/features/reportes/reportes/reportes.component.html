@@ -1,0 +1,335 @@
+<div class="container-fluid py-4">
+  <h4 class="mb-4"><i class="bi bi-bar-chart-line me-2"></i>Reportes</h4>
+
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='buses'" (click)="setTab('buses')">
+        <i class="bi bi-bus-front me-1"></i>Buses por línea
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='recorridos'" (click)="setTab('recorridos')">
+        <i class="bi bi-map me-1"></i>Recorridos
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='alertas'" (click)="setTab('alertas')">
+        <i class="bi bi-exclamation-triangle me-1"></i>Alertas
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='ocupacion'" (click)="setTab('ocupacion')">
+        <i class="bi bi-people me-1"></i>Ocupación
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='estaciones'" (click)="setTab('estaciones')">
+        <i class="bi bi-geo-alt me-1"></i>Estaciones por línea
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='municipalidades'" (click)="setTab('municipalidades')">
+        <i class="bi bi-building me-1"></i>Líneas por municipalidad
+      </button>
+    </li>
+  </ul>
+
+  <!-- BUSES POR LÍNEA -->
+  @if (activeTab === 'buses') {
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Buses por línea</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="cargarBusesPorLinea()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+      <div class="card-body p-0">
+        @if (loadingBuses) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (busesPorLinea.length === 0) {
+          <p class="text-center text-muted py-4 mb-0">Sin datos.</p>
+        } @else {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Línea</th>
+                <th class="text-center">Total</th>
+                <th class="text-center">Activos</th>
+                <th class="text-center">Mantenimiento</th>
+                <th class="text-center">Baja</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of busesPorLinea; track b.idLinea) {
+                <tr>
+                  <td>{{ b.nombreLinea }}</td>
+                  <td class="text-center"><span class="badge bg-primary">{{ b.totalBuses }}</span></td>
+                  <td class="text-center"><span class="badge bg-success">{{ b.busesActivos }}</span></td>
+                  <td class="text-center"><span class="badge bg-warning text-dark">{{ b.busesMantenimiento }}</span></td>
+                  <td class="text-center"><span class="badge bg-danger">{{ b.busesBaja }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- RECORRIDOS POR PERÍODO -->
+  @if (activeTab === 'recorridos') {
+    <div class="card shadow-sm">
+      <div class="card-header">Recorridos por período</div>
+      <div class="card-body">
+        <form [formGroup]="filtroRecorridos" (ngSubmit)="buscarRecorridos()" class="row g-3 mb-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Desde <span class="text-danger">*</span></label>
+            <input formControlName="desde" type="date" class="form-control" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Hasta <span class="text-danger">*</span></label>
+            <input formControlName="hasta" type="date" class="form-control" />
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </div>
+        </form>
+
+        @if (loadingRecorridos) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (recorridos.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Bus</th>
+                  <th>Línea</th>
+                  <th>Piloto</th>
+                  <th class="text-center">Pas. Ida</th>
+                  <th class="text-center">Pas. Vuelta</th>
+                  <th>Salida</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of recorridos; track r.idRecorrido) {
+                  <tr>
+                    <td>{{ r.numeroUnidad }}</td>
+                    <td>{{ r.nombreLinea }}</td>
+                    <td>{{ r.nombrePiloto }} {{ r.apellidoPiloto }}</td>
+                    <td class="text-center">{{ r.pasajerosIda }}</td>
+                    <td class="text-center">{{ r.pasajerosVuelta ?? '—' }}</td>
+                    <td>{{ r.fechaSalida | date:'dd/MM/yy HH:mm' }}</td>
+                    <td><span class="badge" [class]="r.estado === 'completado' ? 'bg-success' : 'bg-info text-dark'">{{ r.estado }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ALERTAS POR PERÍODO -->
+  @if (activeTab === 'alertas') {
+    <div class="card shadow-sm">
+      <div class="card-header">Alertas por período</div>
+      <div class="card-body">
+        <form [formGroup]="filtroAlertas" (ngSubmit)="buscarAlertas()" class="row g-3 mb-4 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label">Desde <span class="text-danger">*</span></label>
+            <input formControlName="desde" type="date" class="form-control" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Hasta <span class="text-danger">*</span></label>
+            <input formControlName="hasta" type="date" class="form-control" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Tipo</label>
+            <select formControlName="tipo" class="form-select">
+              <option value="">Todos</option>
+              <option value="capacidad_excedida">Capacidad excedida</option>
+              <option value="bus_bajo_ocupacion">Bus bajo ocupación</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </div>
+        </form>
+
+        @if (loadingAlertas) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (alertas.length > 0) {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Bus</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Fecha</th>
+                <th>Resuelta</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of alertas; track a.idAlerta) {
+                <tr>
+                  <td>{{ a.numeroUnidad }}</td>
+                  <td><span class="badge" [class]="a.tipo === 'capacidad_excedida' ? 'bg-danger' : 'bg-warning text-dark'">{{ a.tipo }}</span></td>
+                  <td>{{ a.descripcion }}</td>
+                  <td>{{ a.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+                  <td>
+                    @if (a.resuelta) {
+                      <span class="badge bg-success">Sí</span>
+                    } @else {
+                      <span class="badge bg-danger">No</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- OCUPACIÓN PROMEDIO -->
+  @if (activeTab === 'ocupacion') {
+    <div class="card shadow-sm">
+      <div class="card-header">Ocupación promedio por bus</div>
+      <div class="card-body">
+        <form [formGroup]="filtroOcupacion" (ngSubmit)="buscarOcupacion()" class="row g-3 mb-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Desde <span class="text-danger">*</span></label>
+            <input formControlName="desde" type="date" class="form-control" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Hasta <span class="text-danger">*</span></label>
+            <input formControlName="hasta" type="date" class="form-control" />
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+          </div>
+        </form>
+
+        @if (loadingOcupacion) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (ocupacion.length > 0) {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Bus</th>
+                <th class="text-center">Capacidad</th>
+                <th class="text-center">Recorridos</th>
+                <th class="text-center">Prom. ocupación ida</th>
+                <th class="text-center">% ocupación ida</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (o of ocupacion; track o.idBus) {
+                <tr>
+                  <td>{{ o.numeroUnidad }}</td>
+                  <td class="text-center">{{ o.capacidadMaxima }}</td>
+                  <td class="text-center">{{ o.totalRecorridos }}</td>
+                  <td class="text-center">{{ o.promedioOcupacionIda | number:'1.1-1' }}</td>
+                  <td class="text-center">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress flex-grow-1" style="height:8px;">
+                        <div class="progress-bar" [class]="o.porcentajeOcupacionIda >= 80 ? 'bg-danger' : o.porcentajeOcupacionIda >= 50 ? 'bg-warning' : 'bg-success'"
+                          [style.width.%]="o.porcentajeOcupacionIda"></div>
+                      </div>
+                      <span>{{ o.porcentajeOcupacionIda | number:'1.0-0' }}%</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ESTACIONES POR LÍNEA -->
+  @if (activeTab === 'estaciones') {
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Estaciones por línea</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="cargarEstacionesPorLinea()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+      <div class="card-body p-0">
+        @if (loadingEstaciones) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (estacionesPorLinea.length === 0) {
+          <p class="text-center text-muted py-4 mb-0">Sin datos.</p>
+        } @else {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Línea</th>
+                <th>Municipalidad</th>
+                <th class="text-center">Estaciones</th>
+                <th class="text-center">Distancia total (km)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of estacionesPorLinea; track e.idLinea) {
+                <tr>
+                  <td>{{ e.nombreLinea }}</td>
+                  <td>{{ e.nombreMunicipalidad }}</td>
+                  <td class="text-center"><span class="badge bg-primary">{{ e.totalEstaciones }}</span></td>
+                  <td class="text-center">
+                    {{ e.distanciaTotalKm != null ? (e.distanciaTotalKm | number:'1.2-2') + ' km' : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- LÍNEAS POR MUNICIPALIDAD -->
+  @if (activeTab === 'municipalidades') {
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Líneas por municipalidad</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="cargarLineasPorMunicipalidad()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+      <div class="card-body p-0">
+        @if (loadingMunicipalidades) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (lineasPorMunicipalidad.length === 0) {
+          <p class="text-center text-muted py-4 mb-0">Sin datos.</p>
+        } @else {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Municipalidad</th>
+                <th class="text-center">Líneas</th>
+                <th class="text-center">Buses</th>
+                <th class="text-center">Estaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of lineasPorMunicipalidad; track m.idMunicipalidad) {
+                <tr>
+                  <td>{{ m.nombreMunicipalidad }}</td>
+                  <td class="text-center"><span class="badge bg-primary">{{ m.totalLineas }}</span></td>
+                  <td class="text-center"><span class="badge bg-secondary">{{ m.totalBuses }}</span></td>
+                  <td class="text-center"><span class="badge bg-info text-dark">{{ m.totalEstaciones }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+</div>

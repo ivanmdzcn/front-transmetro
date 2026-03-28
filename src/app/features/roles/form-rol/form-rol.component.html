@@ -1,0 +1,75 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+
+      <!-- Cabecera -->
+      <div class="d-flex align-items-center mb-4">
+        <a routerLink="/roles" class="btn btn-sm btn-outline-secondary me-3">
+          <i class="bi bi-arrow-left"></i>
+        </a>
+        <h2 class="h4 fw-semibold mb-0">
+          <i class="bi bi-shield-plus me-2 text-primary"></i>
+          {{ isEditMode ? 'Editar Rol' : 'Nuevo Rol' }}
+        </h2>
+      </div>
+
+      <!-- Spinner carga -->
+      <div *ngIf="loading && isEditMode" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!(loading && isEditMode)">
+
+        <!-- Error -->
+        <div *ngIf="errorMsg" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form [formGroup]="rolForm" (ngSubmit)="onSubmit()" novalidate>
+
+              <!-- Nombre -->
+              <div class="mb-3">
+                <label for="nombre" class="form-label fw-semibold">Nombre del rol <span class="text-danger">*</span></label>
+                <input id="nombre" type="text" formControlName="nombre"
+                       class="form-control"
+                       [ngClass]="{'is-invalid': f['nombre'].invalid && f['nombre'].touched}"
+                       placeholder="Ej: Veterinario" />
+                <div class="invalid-feedback">
+                  <span *ngIf="f['nombre'].errors?.['required']">El nombre es obligatorio.</span>
+                  <span *ngIf="f['nombre'].errors?.['minlength']">Mínimo 3 caracteres.</span>
+                </div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="mb-4">
+                <label for="descripcion" class="form-label fw-semibold">Descripción</label>
+                <textarea id="descripcion" formControlName="descripcion"
+                          class="form-control" rows="3"
+                          placeholder="Descripción del rol (opcional)"></textarea>
+              </div>
+
+              <!-- Botones -->
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" [disabled]="loading">
+                  <span *ngIf="!loading">
+                    <i class="bi me-1" [ngClass]="isEditMode ? 'bi-floppy' : 'bi-plus-lg'"></i>
+                    {{ isEditMode ? 'Guardar cambios' : 'Crear rol' }}
+                  </span>
+                  <span *ngIf="loading">
+                    <span class="spinner-border spinner-border-sm me-1"></span>Procesando...
+                  </span>
+                </button>
+                <a routerLink="/roles" class="btn btn-outline-secondary">Cancelar</a>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

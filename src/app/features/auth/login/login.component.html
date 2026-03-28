@@ -1,0 +1,95 @@
+<div class="login-wrapper d-flex align-items-center justify-content-center min-vh-100">
+
+  <!-- Fondo decorativo -->
+  <div class="login-bg-overlay"></div>
+
+  <!-- Tarjeta de login -->
+  <div class="login-card card shadow-lg border-0" style="width: 420px; max-width: 95vw;">
+
+    <!-- Encabezado de tarjeta -->
+    <div class="card-header login-card-header text-center py-4">
+      <i class="bi bi-shield-lock fs-1 text-white"></i>
+      <h4 class="text-white mt-2 mb-0 fw-bold">LM &mdash; Corp</h4>
+      <small class="text-white-50">Sistema de Gestión Empresarial</small>
+    </div>
+
+    <div class="card-body p-4">
+
+      <!-- Alerta de error -->
+      <div *ngIf="errorMsg" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMsg }}
+        <button type="button" class="btn-close btn-close-sm" (click)="errorMsg=''"></button>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Identificador -->
+        <div class="mb-3">
+          <label for="identificador" class="form-label fw-semibold">Usuario o Email</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="bi bi-person-fill text-secondary"></i>
+            </span>
+            <input
+              id="identificador"
+              type="text"
+              class="form-control"
+              formControlName="identificador"
+              placeholder="Ingresa tu usuario o email"
+              [class.is-invalid]="f['identificador'].invalid && f['identificador'].touched"
+              autocomplete="username"
+            />
+            <div class="invalid-feedback">El identificador es requerido.</div>
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="mb-4">
+          <label for="contrasena" class="form-label fw-semibold">Contraseña</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">
+              <i class="bi bi-lock-fill text-secondary"></i>
+            </span>
+            <input
+              id="contrasena"
+              [type]="showPass ? 'text' : 'password'"
+              class="form-control"
+              formControlName="contrasena"
+              placeholder="••••••••"
+              [class.is-invalid]="f['contrasena'].invalid && f['contrasena'].touched"
+              autocomplete="current-password"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="showPass = !showPass"
+              [attr.aria-label]="showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <i [class]="showPass ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+            <div class="invalid-feedback">Mínimo 4 caracteres.</div>
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg fw-semibold"
+            [disabled]="loading"
+          >
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            {{ loading ? 'Ingresando...' : 'Iniciar Sesión' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Pie de tarjeta -->
+    <div class="card-footer text-center text-muted py-3">
+      <small>&copy; {{ currentYear }} LM &mdash; Todos los derechos reservados</small>
+    </div>
+
+  </div>
+</div>

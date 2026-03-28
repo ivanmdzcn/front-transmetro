@@ -1,0 +1,36 @@
+// ── App shell layout ──────────────────────────────────────────────────
+.app-body {
+  margin-top: var(--pb-header-h);
+  min-height: calc(100vh - var(--pb-header-h) - var(--pb-footer-h));
+}
+
+// ── Main content area ─────────────────────────────────────────────────
+.main-content {
+  background-color: var(--pb-bg);
+  transition: margin-left 0.3s ease;
+  margin-left: 0;
+  min-width: 0; // Fix flex overflow
+
+  &.sidebar-open {
+    margin-left: var(--pb-sidebar-w);
+  }
+
+  @media (max-width: 991.98px) {
+    &.sidebar-open { margin-left: 0; }
+  }
+}
+
+// ── Mobile overlay ────────────────────────────────────────────────────
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+
+  &.active {
+    display: block;
+
+    @media (min-width: 992px) { display: none; }
+  }
+}

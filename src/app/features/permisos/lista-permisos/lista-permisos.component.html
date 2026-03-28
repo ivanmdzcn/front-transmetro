@@ -1,0 +1,61 @@
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h4 fw-semibold mb-0"><i class="bi bi-key me-2 text-primary"></i>Permisos</h2>
+      <p class="text-muted mb-0 small">Permisos del sistema por módulo</p>
+    </div>
+    <a *ngIf="puedeCrear" routerLink="crear" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Nuevo permiso
+    </a>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}</div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>
+  </div>
+
+  <div *ngIf="!loading" class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width:50px">#</th>
+            <th>Permiso</th>
+            <th>Módulo</th>
+            <th class="text-center" style="width:120px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of permisos">
+            <td class="text-muted small">{{ p.id }}</td>
+            <td><code>{{ p.nombre }}</code></td>
+            <td><span class="badge bg-secondary">{{ p.modulo }}</span></td>
+            <td class="text-center">
+              <button *ngIf="puedeEditar"
+                      class="btn btn-sm btn-outline-primary me-1"
+                      (click)="editar(p.id)"
+                      title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button *ngIf="puedeEliminar"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="eliminar(p.id)"
+                      title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="permisos.length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">
+              <i class="bi bi-inbox display-6 d-block mb-2"></i>
+              No hay permisos registrados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

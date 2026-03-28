@@ -1,0 +1,192 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center mb-4 gap-2">
+    <a routerLink="/pilotos" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    @if (piloto) {
+      <h4 class="mb-0">{{ piloto.nombre }} {{ piloto.apellido }}</h4>
+      <span class="badge ms-2" [class]="piloto.activo ? 'bg-success' : 'bg-secondary'">
+        {{ piloto.activo ? 'Activo' : 'Inactivo' }}
+      </span>
+    }
+  </div>
+
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='educacion'" (click)="activeTab='educacion'">
+        <i class="bi bi-mortarboard me-1"></i>Educación
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='residencia'" (click)="activeTab='residencia'">
+        <i class="bi bi-house me-1"></i>Residencia
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='bus'" (click)="activeTab='bus'">
+        <i class="bi bi-bus-front me-1"></i>Bus asignado
+      </button>
+    </li>
+  </ul>
+
+  <!-- EDUCACIÓN -->
+  @if (activeTab === 'educacion') {
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Historial educativo</span>
+        @if (puedeEditar) {
+          <button class="btn btn-primary btn-sm" (click)="mostrarFormEduc = !mostrarFormEduc">
+            <i class="bi bi-plus-lg me-1"></i>Agregar
+          </button>
+        }
+      </div>
+
+      @if (errorEducacion) {
+        <div class="alert alert-danger m-3">{{ errorEducacion }}</div>
+      }
+
+      @if (mostrarFormEduc && puedeEditar) {
+        <div class="card-body border-bottom bg-light">
+          <form [formGroup]="educacionForm" (ngSubmit)="agregarEducacion()" class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Nivel <span class="text-danger">*</span></label>
+              <input formControlName="nivel" type="text" class="form-control"
+                [class.is-invalid]="fe['nivel'].invalid && fe['nivel'].touched" placeholder="Ej: Universitario" />
+              @if (fe['nivel'].invalid && fe['nivel'].touched) {
+                <div class="invalid-feedback">Campo requerido.</div>
+              }
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Título <span class="text-danger">*</span></label>
+              <input formControlName="titulo" type="text" class="form-control"
+                [class.is-invalid]="fe['titulo'].invalid && fe['titulo'].touched" />
+              @if (fe['titulo'].invalid && fe['titulo'].touched) {
+                <div class="invalid-feedback">Campo requerido.</div>
+              }
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Año <span class="text-danger">*</span></label>
+              <input formControlName="anioGraduacion" type="number" class="form-control"
+                [class.is-invalid]="fe['anioGraduacion'].invalid && fe['anioGraduacion'].touched" />
+              @if (fe['anioGraduacion'].invalid && fe['anioGraduacion'].touched) {
+                <div class="invalid-feedback">Año inválido.</div>
+              }
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+              <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+              <button type="button" class="btn btn-secondary btn-sm"
+                (click)="mostrarFormEduc=false; educacionForm.reset()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <div class="card-body p-0">
+        @if (educaciones.length === 0) {
+          <p class="text-center text-muted py-4 mb-0">No hay registros educativos.</p>
+        } @else {
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nivel</th>
+                <th>Título</th>
+                <th>Año</th>
+                @if (puedeEditar) { <th class="text-end">Acciones</th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of educaciones; track e.idEducacion) {
+                <tr>
+                  <td>{{ e.nivel }}</td>
+                  <td>{{ e.titulo }}</td>
+                  <td>{{ e.anioGraduacion }}</td>
+                  @if (puedeEditar) {
+                    <td class="text-end">
+                      <button class="btn btn-outline-danger btn-sm" (click)="eliminarEducacion(e.idEducacion)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- RESIDENCIA -->
+  @if (activeTab === 'residencia') {
+    <div class="card shadow-sm" style="max-width: 600px;">
+      <div class="card-header">Información de residencia</div>
+      @if (errorResidencia) {
+        <div class="alert alert-danger m-3">{{ errorResidencia }}</div>
+      }
+      <div class="card-body">
+        <form [formGroup]="residenciaForm" (ngSubmit)="guardarResidencia()">
+          <div class="mb-3">
+            <label class="form-label">Dirección <span class="text-danger">*</span></label>
+            <input formControlName="direccion" type="text" class="form-control"
+              [class.is-invalid]="fr['direccion'].invalid && fr['direccion'].touched" />
+            @if (fr['direccion'].invalid && fr['direccion'].touched) {
+              <div class="invalid-feedback">Campo requerido.</div>
+            }
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Municipio <span class="text-danger">*</span></label>
+              <input formControlName="municipio" type="text" class="form-control"
+                [class.is-invalid]="fr['municipio'].invalid && fr['municipio'].touched" />
+              @if (fr['municipio'].invalid && fr['municipio'].touched) {
+                <div class="invalid-feedback">Campo requerido.</div>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Departamento <span class="text-danger">*</span></label>
+              <input formControlName="departamento" type="text" class="form-control"
+                [class.is-invalid]="fr['departamento'].invalid && fr['departamento'].touched" />
+              @if (fr['departamento'].invalid && fr['departamento'].touched) {
+                <div class="invalid-feedback">Campo requerido.</div>
+              }
+            </div>
+          </div>
+          @if (puedeEditar) {
+            <button type="submit" class="btn btn-primary mt-3">Guardar residencia</button>
+          }
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- BUS ASIGNADO -->
+  @if (activeTab === 'bus') {
+    <div class="card shadow-sm" style="max-width: 500px;">
+      <div class="card-header">Bus asignado</div>
+      @if (errorBus) {
+        <div class="alert alert-danger m-3">{{ errorBus }}</div>
+      }
+      <div class="card-body">
+        @if (piloto?.numeroUnidad) {
+          <p class="mb-3">Bus actual: <strong>{{ piloto?.numeroUnidad }}</strong></p>
+        } @else {
+          <p class="text-muted mb-3">Sin bus asignado.</p>
+        }
+        @if (puedeEditar) {
+          <form [formGroup]="busForm" (ngSubmit)="asignarBus()">
+            <div class="mb-3">
+              <label class="form-label">Seleccionar bus</label>
+              <select formControlName="idBus" class="form-select">
+                <option [ngValue]="null">Sin bus</option>
+                @for (b of busesActivos; track b.idBus) {
+                  <option [value]="b.idBus">{{ b.numeroUnidad }} — {{ b.nombreLinea ?? 'Sin línea' }}</option>
+                }
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+          </form>
+        }
+      </div>
+    </div>
+  }
+</div>

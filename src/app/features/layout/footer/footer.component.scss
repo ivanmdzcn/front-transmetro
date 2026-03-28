@@ -1,0 +1,23 @@
+.app-footer {
+  height: var(--pb-footer-h);
+  background: var(--pb-primary);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 1.5rem;
+  font-size: .8rem;
+  flex-shrink: 0;
+  position: relative;
+
+  .footer-copy {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  a {
+    color: rgba(255,255,255,0.7);
+    &:hover { color: #fff; }
+  }
+}

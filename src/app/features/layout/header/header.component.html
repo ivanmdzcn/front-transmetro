@@ -1,0 +1,63 @@
+﻿<nav class="navbar app-header px-3 d-flex align-items-center justify-content-between">
+
+  <!-- Izquierda: toggle + marca -->
+  <div class="d-flex align-items-center gap-2">
+    <button class="btn-toggle" (click)="onToggle()" aria-label="Alternar menu">
+      <i class="bi bi-list"></i>
+    </button>
+    <span class="brand-logo">
+      <i class="bi bi-building me-1"></i>{{ nombreEmpresa }}
+    </span>
+  </div>
+
+  <!-- Derecha: acciones de usuario -->
+  <div class="d-flex align-items-center gap-3" *ngIf="currentUser$ | async as user">
+
+    <!-- Notificaciones -->
+    <button class="btn-toggle position-relative" aria-label="Notificaciones">
+      <i class="bi bi-bell"></i>
+    </button>
+
+    <!-- Rol badge -->
+    <span class="badge bg-light text-dark d-none d-md-inline border">
+      <i class="bi bi-shield-check me-1 text-success"></i>{{ user.rol ?? 'Sin rol' }}
+    </span>
+
+    <!-- Menu de usuario -->
+    <div class="dropdown">
+      <button
+        class="btn btn-sm btn-outline-light d-flex align-items-center gap-2"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <i class="bi bi-person-circle fs-5"></i>
+        <span class="d-none d-md-inline">{{ user.nombre }}</span>
+        <i class="bi bi-chevron-down small"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li class="dropdown-header px-3 py-2 border-bottom">
+          <div class="fw-semibold text-dark">{{ user.nombre }}</div>
+          <small class="text-muted">{{ user.email }}</small>
+        </li>
+        <li>
+          <a class="dropdown-item" routerLink="/perfil">
+            <i class="bi bi-person me-2"></i>Mi perfil
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" routerLink="/configuracion">
+            <i class="bi bi-gear me-2"></i>Configuracion
+          </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <button class="dropdown-item text-danger" (click)="onLogout()">
+            <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesion
+          </button>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</nav>

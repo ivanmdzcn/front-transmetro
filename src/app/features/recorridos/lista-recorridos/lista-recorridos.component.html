@@ -1,0 +1,115 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-map me-2"></i>Recorridos activos</h4>
+    <div class="d-flex gap-2">
+      <a routerLink="historial" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-clock-history me-1"></i>Historial
+      </a>
+      @if (puedeCrear) {
+        <a routerLink="iniciar" class="btn btn-primary btn-sm">
+          <i class="bi bi-play-fill me-1"></i>Iniciar recorrido
+        </a>
+      }
+    </div>
+  </div>
+
+  @if (errorMsg) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ errorMsg }}
+      <button type="button" class="btn-close" (click)="errorMsg=''"></button>
+    </div>
+  }
+
+  <!-- Panel registrar llegada -->
+  @if (llegadaRecorridoId !== null) {
+    <div class="card shadow-sm mb-4 border-primary">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span>Registrar llegada — Recorrido #{{ llegadaRecorridoId }}</span>
+        <button type="button" class="btn-close btn-close-white" (click)="llegadaRecorridoId=null"></button>
+      </div>
+      <div class="card-body">
+        @if (errorLlegada) {
+          <div class="alert alert-danger">{{ errorLlegada }}</div>
+        }
+
+        @if (loadingParadas) {
+          <div class="text-center py-2"><span class="spinner-border spinner-border-sm text-primary"></span> Verificando paradas...</div>
+        } @else if (paradasLlegada.length === 0) {
+          <div class="alert alert-warning py-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No se encontraron paradas para este recorrido. No se puede confirmar la llegada.
+          </div>
+        } @else if (!todasParadasCompletadas) {
+          <div class="alert alert-warning py-2">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>No se puede confirmar la llegada.</strong> Las siguientes paradas aún no fueron completadas:
+            <ul class="mb-0 mt-1">
+              @for (p of paradasLlegada; track p.idRecorridoParada) {
+                @if (p.estado !== 'completado') {
+                  <li>Parada {{ p.numeroParada }}: <strong>{{ p.nombreEstacion }}</strong> — <span class="badge bg-warning text-dark">{{ p.estado }}</span></li>
+                }
+              }
+            </ul>
+          </div>
+        } @else {
+          <div class="alert alert-secondary py-2 mb-3">
+            <i class="bi bi-bus-front me-2"></i>
+            Todas las paradas completadas. Los pasajeros a bordo se obtienen automáticamente de la última parada.
+          </div>
+          <button class="btn btn-primary" (click)="registrarLlegada()" [disabled]="loadingLlegada">
+            @if (loadingLlegada) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <i class="bi bi-flag-fill me-1"></i>Confirmar llegada
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      @if (loading) {
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+      } @else if (recorridos.length === 0) {
+        <p class="text-center text-muted py-4 mb-0">No hay recorridos activos en este momento.</p>
+      } @else {
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Bus</th>
+              <th>Línea</th>
+              <th>Piloto</th>
+              <th>Pasajeros ida</th>
+              <th>Salida</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of recorridos; track r.idRecorrido) {
+              <tr>
+                <td>{{ r.idRecorrido }}</td>
+                <td>{{ r.numeroUnidad }}</td>
+                <td>{{ r.nombreLinea }}</td>
+                <td>{{ r.nombrePiloto }} {{ r.apellidoPiloto }}</td>
+                <td>{{ r.pasajerosIda }}</td>
+                <td>{{ r.fechaSalida | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="badge bg-info text-dark">{{ r.estado }}</span></td>
+                <td class="text-end">
+                  <a [routerLink]="['paradas', r.idRecorrido]" class="btn btn-outline-primary btn-sm me-1">
+                    <i class="bi bi-signpost-split me-1"></i>Paradas
+                  </a>
+                  @if (puedeEditar) {
+                    <button class="btn btn-success btn-sm" (click)="abrirLlegada(r.idRecorrido)">
+                      <i class="bi bi-flag-fill me-1"></i>Llegada
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>

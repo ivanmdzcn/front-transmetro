@@ -1,0 +1,58 @@
+﻿<aside class="app-sidebar" [class.open]="isOpen">
+
+  <!-- Info de usuario -->
+  <div class="sidebar-brand">
+    <div class="avatar">
+      <i class="bi bi-person-fill"></i>
+    </div>
+    <div class="user-info">
+      <div class="name">{{ nombreUsuario || 'Usuario' }}</div>
+      <div class="role">{{ rol }}</div>
+    </div>
+  </div>
+
+  <!-- Navegacion -->
+  <nav class="sidebar-nav">
+
+    <!-- Dashboard (siempre visible) -->
+    <a
+      [routerLink]="dashboardItem.route"
+      routerLinkActive="active"
+      class="nav-item"
+      (click)="handleNavClick()"
+    >
+      <i [class]="'bi ' + dashboardItem.icon"></i>
+      <span>{{ dashboardItem.label }}</span>
+    </a>
+
+    <!-- Secciones colapsables -->
+    <div class="nav-section" *ngFor="let section of sections">
+
+      <!-- Encabezado de sección (toggle) -->
+      <button class="nav-section-header" (click)="toggleSection(section)">
+        <span class="section-title">
+          <i [class]="'bi ' + section.icon"></i>
+          {{ section.label }}
+        </span>
+        <i class="bi section-chevron" [class.bi-chevron-down]="section.open" [class.bi-chevron-right]="!section.open"></i>
+      </button>
+
+      <!-- Ítems de la sección -->
+      <div class="nav-section-items" [class.expanded]="section.open">
+        <a
+          *ngFor="let item of section.items"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          class="nav-item nav-item--child"
+          (click)="handleNavClick()"
+        >
+          <i [class]="'bi ' + item.icon"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      </div>
+
+    </div>
+
+  </nav>
+
+</aside>

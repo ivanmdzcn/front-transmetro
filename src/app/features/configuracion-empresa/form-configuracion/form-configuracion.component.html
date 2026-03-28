@@ -1,0 +1,394 @@
+<div class="container-fluid py-4">
+
+  <!-- Encabezado -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h4 fw-semibold mb-0">
+        <i class="bi bi-sliders me-2 text-primary"></i>Configuración de la Empresa
+      </h2>
+      <p class="text-muted mb-0 small">Datos generales, moneda y preferencias del sistema</p>
+    </div>
+    <button *ngIf="puedeEditar"
+            type="button"
+            class="btn btn-primary"
+            [disabled]="guardando"
+            (click)="guardar()">
+      <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+      <i *ngIf="!guardando" class="bi bi-floppy me-1"></i>
+      Guardar cambios
+    </button>
+  </div>
+
+  <!-- Alertas globales -->
+  <div *ngIf="errorMsg" class="alert alert-danger alert-dismissible mb-3">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}
+    <button type="button" class="btn-close" (click)="errorMsg=''"></button>
+  </div>
+  <div *ngIf="successMsg" class="alert alert-success alert-dismissible mb-3">
+    <i class="bi bi-check-circle me-2"></i>{{ successMsg }}
+    <button type="button" class="btn-close" (click)="successMsg=''"></button>
+  </div>
+
+  <!-- Spinner de carga inicial -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="guardar()">
+
+    <!-- Tabs de navegación -->
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='basicos'" (click)="setTab('basicos')">
+          <i class="bi bi-building me-1"></i>Datos básicos
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='direccion'" (click)="setTab('direccion')">
+          <i class="bi bi-geo-alt me-1"></i>Dirección
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='contacto'" (click)="setTab('contacto')">
+          <i class="bi bi-telephone me-1"></i>Contacto
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='moneda'" (click)="setTab('moneda')">
+          <i class="bi bi-currency-exchange me-1"></i>Moneda
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='marca'" (click)="setTab('marca')">
+          <i class="bi bi-palette me-1"></i>Marca
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" [class.active]="activeTab==='documentos'" (click)="setTab('documentos')">
+          <i class="bi bi-file-text me-1"></i>Documentos
+        </button>
+      </li>
+    </ul>
+
+    <!-- ──────────────── TAB: DATOS BÁSICOS ──────────────── -->
+    <div [hidden]="activeTab !== 'basicos'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Identificación de la empresa</h6>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Razón social <span class="text-danger">*</span></label>
+              <input formControlName="razonSocial"
+                     type="text"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('razonSocial')}"
+                     placeholder="Nombre legal de la empresa" />
+              <div class="invalid-feedback">La razón social es requerida.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre comercial</label>
+              <input formControlName="nombreComercial"
+                     type="text"
+                     class="form-control"
+                     placeholder="Nombre conocido por el público" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">NIF / RUT / NIT</label>
+              <input formControlName="numeroIdentificacionFiscal"
+                     type="text"
+                     class="form-control"
+                     placeholder="Número de identificación fiscal" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── TAB: DIRECCIÓN ──────────────── -->
+    <div [hidden]="activeTab !== 'direccion'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Ubicación física</h6>
+          <div class="row g-3">
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Dirección <span class="text-danger">*</span></label>
+              <textarea formControlName="direccion"
+                        class="form-control"
+                        [ngClass]="{'is-invalid': isInvalid('direccion')}"
+                        rows="2"
+                        placeholder="Calle, número, colonia..."></textarea>
+              <div class="invalid-feedback">La dirección es requerida.</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Ciudad</label>
+              <input formControlName="ciudad" type="text" class="form-control" placeholder="Ciudad" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Estado / Provincia</label>
+              <input formControlName="estadoProvincia" type="text" class="form-control" placeholder="Estado o Provincia" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Código postal</label>
+              <input formControlName="codigoPostal" type="text" class="form-control" placeholder="01001" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">País <span class="text-danger">*</span></label>
+              <input formControlName="pais"
+                     type="text"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('pais')}"
+                     placeholder="Guatemala" />
+              <div class="invalid-feedback">El país es requerido.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── TAB: CONTACTO ──────────────── -->
+    <div [hidden]="activeTab !== 'contacto'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Información de contacto</h6>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Teléfono principal</label>
+              <input formControlName="telefonoPrincipal" type="tel" class="form-control" placeholder="+502 1234-5678" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Teléfono secundario</label>
+              <input formControlName="telefonoSecundario" type="tel" class="form-control" placeholder="+502 1234-5678" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email principal <span class="text-danger">*</span></label>
+              <input formControlName="emailPrincipal"
+                     type="email"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('emailPrincipal')}"
+                     placeholder="info@empresa.com" />
+              <div class="invalid-feedback">Ingresa un email válido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email secundario</label>
+              <input formControlName="emailSecundario"
+                     type="email"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('emailSecundario')}"
+                     placeholder="ventas@empresa.com" />
+              <div class="invalid-feedback">Ingresa un email válido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Sitio web</label>
+              <input formControlName="sitioWeb" type="url" class="form-control" placeholder="https://www.empresa.com" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── TAB: MONEDA ──────────────── -->
+    <div [hidden]="activeTab !== 'moneda'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Configuración de moneda</h6>
+          <div class="row g-3">
+
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Código ISO <span class="text-danger">*</span></label>
+              <input formControlName="codigoMoneda"
+                     type="text"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('codigoMoneda')}"
+                     placeholder="GTQ"
+                     maxlength="3"
+                     style="text-transform:uppercase" />
+              <div class="invalid-feedback">Código requerido (máx. 3 caracteres).</div>
+              <div class="form-text">Ej. GTQ, USD, EUR</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Símbolo <span class="text-danger">*</span></label>
+              <input formControlName="simboloMoneda"
+                     type="text"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('simboloMoneda')}"
+                     placeholder="Q"
+                     maxlength="10" />
+              <div class="invalid-feedback">El símbolo es requerido.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre de la moneda</label>
+              <input formControlName="nombreMoneda" type="text" class="form-control" placeholder="Quetzal" maxlength="50" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Posición del símbolo <span class="text-danger">*</span></label>
+              <select formControlName="posicionSimbolo" class="form-select">
+                <option value="antes">Antes del monto (Q 100.00)</option>
+                <option value="despues">Después del monto (100.00 Q)</option>
+              </select>
+            </div>
+
+            <div class="col-md-2">
+              <label class="form-label fw-semibold">Decimales <span class="text-danger">*</span></label>
+              <input formControlName="decimales"
+                     type="number"
+                     class="form-control"
+                     [ngClass]="{'is-invalid': isInvalid('decimales')}"
+                     min="0" max="4" />
+              <div class="invalid-feedback">Entre 0 y 4.</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Separador de miles</label>
+              <select formControlName="separadorMiles" class="form-select">
+                <option value=",">, (coma)</option>
+                <option value=".">. (punto)</option>
+                <option value=" ">  (espacio)</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Separador de decimales</label>
+              <select formControlName="separadorDecimales" class="form-select">
+                <option value=".">. (punto)</option>
+                <option value=",">, (coma)</option>
+              </select>
+            </div>
+
+            <!-- Vista previa de formato -->
+            <div class="col-12">
+              <div class="alert alert-light border mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-eye text-primary"></i>
+                <span class="text-muted small">Vista previa:</span>
+                <strong>
+                  <ng-container *ngIf="form.get('posicionSimbolo')?.value === 'antes'">
+                    {{ form.get('simboloMoneda')?.value }}
+                  </ng-container>
+                  1{{ form.get('separadorMiles')?.value }}234{{ form.get('separadorDecimales')?.value }}{{ form.get('decimales')?.value === 0 ? '' : '00' }}
+                  <ng-container *ngIf="form.get('posicionSimbolo')?.value === 'despues'">
+                    {{ form.get('simboloMoneda')?.value }}
+                  </ng-container>
+                </strong>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── TAB: MARCA ──────────────── -->
+    <div [hidden]="activeTab !== 'marca'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Identidad visual</h6>
+          <div class="row g-3">
+
+            <div class="col-md-8">
+              <label class="form-label fw-semibold">URL del logo</label>
+              <input formControlName="logoUrl"
+                     type="url"
+                     class="form-control"
+                     placeholder="https://cdn.empresa.com/logo.png" />
+              <div class="form-text">URL pública de la imagen del logo (PNG, SVG recomendado).</div>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label d-block fw-semibold">Color primario</label>
+              <div class="d-flex align-items-center gap-2">
+                <input formControlName="colorPrimario"
+                       type="color"
+                       class="form-control form-control-color"
+                       style="width:3rem;height:2.5rem"
+                       title="Color primario de la marca" />
+                <input formControlName="colorPrimario"
+                       type="text"
+                       class="form-control"
+                       placeholder="#3B82F6"
+                       maxlength="7" />
+              </div>
+            </div>
+
+            <!-- Vista previa del logo -->
+            <div class="col-12" *ngIf="form.get('logoUrl')?.value">
+              <label class="form-label fw-semibold">Vista previa del logo</label>
+              <div class="border rounded p-3 bg-light d-inline-block">
+                <img [src]="form.get('logoUrl')?.value"
+                     alt="Logo empresa"
+                     style="max-height:100px;max-width:300px;object-fit:contain"
+                     onerror="this.style.display='none'" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── TAB: DOCUMENTOS ──────────────── -->
+    <div [hidden]="activeTab !== 'documentos'">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-semibold text-muted mb-3">Textos para documentos impresos</h6>
+          <div class="row g-3">
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Pie de página en documentos</label>
+              <textarea formControlName="piePaginaDocumentos"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Texto que aparece al pie de facturas, cotizaciones, etc."></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Mensaje de agradecimiento</label>
+              <textarea formControlName="mensajeAgradecimiento"
+                        class="form-control"
+                        rows="3"
+                        placeholder="¡Gracias por su preferencia!"></textarea>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso cuando no tiene permiso de editar -->
+    <div *ngIf="!puedeEditar" class="alert alert-warning mt-3">
+      <i class="bi bi-lock me-2"></i>No tienes permiso para modificar la configuración.
+    </div>
+
+    <!-- Botón inferior (para comodidad) -->
+    <div class="mt-4 d-flex justify-content-end" *ngIf="puedeEditar">
+      <button type="submit"
+              class="btn btn-primary"
+              [disabled]="guardando">
+        <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+        <i *ngIf="!guardando" class="bi bi-floppy me-1"></i>
+        Guardar cambios
+      </button>
+    </div>
+
+  </form>
+
+</div>

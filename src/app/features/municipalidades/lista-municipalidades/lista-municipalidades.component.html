@@ -1,0 +1,66 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="h4 fw-semibold mb-0">
+      <i class="bi bi-building me-2 text-primary"></i>Municipalidades
+    </h2>
+    <a *ngIf="puedeCrear" routerLink="crear" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nueva Municipalidad
+    </a>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-danger alert-dismissible" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}
+    <button type="button" class="btn-close" (click)="errorMsg = ''"></button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Cargando...</p>
+  </div>
+
+  <div *ngIf="!loading" class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Departamento</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of municipalidades">
+              <td class="text-muted">{{ m.idMunicipalidad }}</td>
+              <td class="fw-semibold">{{ m.nombre }}</td>
+              <td>{{ m.departamento }}</td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="m.activo ? 'bg-success' : 'bg-danger'">
+                  {{ m.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <a *ngIf="puedeEditar" [routerLink]="['editar', m.idMunicipalidad]"
+                   class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button *ngIf="puedeCambiarEstado"
+                        class="btn btn-sm"
+                        [ngClass]="m.activo ? 'btn-outline-warning' : 'btn-outline-success'"
+                        (click)="cambiarEstado(m.idMunicipalidad, m.activo)"
+                        [title]="m.activo ? 'Desactivar' : 'Activar'">
+                  <i class="bi" [ngClass]="m.activo ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="municipalidades.length === 0">
+              <td colspan="5" class="text-center text-muted py-4">No hay municipalidades registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

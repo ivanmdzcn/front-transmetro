@@ -1,0 +1,13 @@
+services:
+  transmetro-front:
+    image: transmetro-front:latest
+    container_name: transmetro_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - mysql_net
+
+networks:
+  mysql_net:
+    external: true

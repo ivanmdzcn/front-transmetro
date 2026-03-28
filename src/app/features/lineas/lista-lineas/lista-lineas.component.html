@@ -1,0 +1,70 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="h4 fw-semibold mb-0">
+      <i class="bi bi-signpost-split me-2 text-primary"></i>Líneas
+    </h2>
+    <a *ngIf="puedeCrear" routerLink="crear" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Nueva Línea
+    </a>
+  </div>
+
+  <div *ngIf="errorMsg" class="alert alert-danger alert-dismissible">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}
+    <button type="button" class="btn-close" (click)="errorMsg = ''"></button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+
+  <div *ngIf="!loading" class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Municipalidad</th>
+              <th>Descripción</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of lineas">
+              <td class="text-muted">{{ l.idLinea }}</td>
+              <td class="fw-semibold">{{ l.nombre }}</td>
+              <td>{{ l.nombreMunicipalidad }}</td>
+              <td>{{ l.descripcion || '—' }}</td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="l.activo ? 'bg-success' : 'bg-danger'">
+                  {{ l.activo ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <a [routerLink]="[l.idLinea, 'estaciones']"
+                   class="btn btn-sm btn-outline-secondary me-1" title="Ver estaciones">
+                  <i class="bi bi-diagram-3"></i>
+                </a>
+                <a *ngIf="puedeEditar" [routerLink]="['editar', l.idLinea]"
+                   class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-sm"
+                        [ngClass]="l.activo ? 'btn-outline-warning' : 'btn-outline-success'"
+                        (click)="cambiarEstado(l.idLinea, l.activo)"
+                        [title]="l.activo ? 'Desactivar' : 'Activar'">
+                  <i class="bi" [ngClass]="l.activo ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="lineas.length === 0">
+              <td colspan="6" class="text-center text-muted py-4">No hay líneas registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

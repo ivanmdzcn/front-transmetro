@@ -1,0 +1,126 @@
+<div class="container-fluid py-4">
+
+  <!-- Cabecera -->
+  <div class="d-flex align-items-center mb-4">
+    <a routerLink="/usuarios" class="btn btn-sm btn-outline-secondary me-3">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h2 class="h4 fw-semibold mb-0">
+        <i class="bi bi-key me-2 text-primary"></i>Permisos de usuario
+      </h2>
+      <p class="text-muted mb-0 small">{{ nombreUsuario }}</p>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-info-circle-fill"></i>
+    <span>
+      <strong>Verde</strong> = override concedido &nbsp;&bull;&nbsp;
+      <strong>Rojo</strong> = override denegado &nbsp;&bull;&nbsp;
+      Sin fondo = hereda del rol.
+    </span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg" class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}
+  </div>
+
+  <!-- Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Bloques por módulo -->
+  <div *ngIf="!loading">
+    <div *ngFor="let modulo of modulos()" class="mb-4">
+
+      <!-- Título de módulo -->
+      <div class="d-flex align-items-center mb-2">
+        <div class="border-start border-primary border-3 ps-2">
+          <span class="fw-semibold text-uppercase text-muted small">{{ modulo }}</span>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Permiso</th>
+                  <th class="text-center">Override</th>
+                  <th class="text-center">Permiso final</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of agrupados[modulo]"
+                    [ngClass]="{
+                      'table-success': p.tieneOverride && p.overrideConcedido,
+                      'table-danger':  p.tieneOverride && !p.overrideConcedido
+                    }">
+
+                  <td><code>{{ p.nombre }}</code></td>
+
+                  <!-- Override -->
+                  <td class="text-center">
+                    <span *ngIf="p.tieneOverride"
+                          class="badge"
+                          [ngClass]="p.overrideConcedido ? 'bg-success' : 'bg-danger'">
+                      <i class="bi me-1" [ngClass]="p.overrideConcedido ? 'bi-check-lg' : 'bi-x-lg'"></i>
+                      {{ p.overrideConcedido ? 'Concedido' : 'Denegado' }}
+                    </span>
+                    <span *ngIf="!p.tieneOverride" class="badge bg-light text-secondary border">
+                      Hereda rol
+                    </span>
+                  </td>
+
+                  <!-- Permiso final -->
+                  <td class="text-center">
+                    <i class="bi"
+                       [ngClass]="p.permisoFinal ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"
+                       style="font-size:1.1rem"></i>
+                  </td>
+
+                  <!-- Acciones -->
+                  <td class="text-center">
+                    <ng-container *ngIf="!p.tieneOverride">
+                      <button *ngIf="puedeAsignar"
+                              class="btn btn-sm btn-outline-success me-1"
+                              (click)="conceder(p.id)" title="Conceder permiso">
+                        <i class="bi bi-plus-circle"></i>
+                      </button>
+                      <button *ngIf="puedeAsignar"
+                              class="btn btn-sm btn-outline-danger"
+                              (click)="denegar(p.id)" title="Denegar permiso">
+                        <i class="bi bi-dash-circle"></i>
+                      </button>
+                    </ng-container>
+                    <button *ngIf="p.tieneOverride && puedeRevocar"
+                            class="btn btn-sm btn-outline-warning"
+                            (click)="quitarOverride(p.id)"
+                            title="Eliminar override (heredar del rol)">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i>Heredar rol
+                    </button>
+                  </td>
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="modulos().length === 0" class="text-center py-5 text-muted">
+      <i class="bi bi-inbox display-6 d-block mb-2"></i>
+      No hay permisos disponibles.
+    </div>
+  </div>
+
+</div>

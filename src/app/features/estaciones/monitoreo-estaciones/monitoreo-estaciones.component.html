@@ -1,0 +1,103 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="bi bi-activity me-2"></i>Monitoreo de estaciones</h4>
+    <div class="d-flex align-items-center gap-3">
+      @if (ultimaActualizacion) {
+        <small class="text-muted">Actualizado: {{ ultimaActualizacion | date:'HH:mm:ss' }}</small>
+      }
+      <button class="btn btn-outline-secondary btn-sm" (click)="cargar()" [disabled]="loading">
+        <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Resumen -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-4">
+      <div class="card border-danger text-center py-3">
+        <div class="fs-2 fw-bold text-danger">{{ saturadas }}</div>
+        <div class="text-muted small"><i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>Saturadas ≥150%</div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card border-warning text-center py-3">
+        <div class="fs-2 fw-bold text-warning">{{ normales }}</div>
+        <div class="text-muted small"><i class="bi bi-check-circle-fill text-warning me-1"></i>Normales</div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card border-primary text-center py-3">
+        <div class="fs-2 fw-bold text-primary">{{ bajas }}</div>
+        <div class="text-muted small"><i class="bi bi-arrow-down-circle-fill text-primary me-1"></i>Baja ocupación &lt;25%</div>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMsg) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ errorMsg }}
+      <button type="button" class="btn-close" (click)="errorMsg=''"></button>
+    </div>
+  }
+
+  @if (loading && estaciones.length === 0) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (estaciones.length === 0) {
+    <p class="text-center text-muted py-4">No hay estaciones activas.</p>
+  } @else {
+    <div class="row g-3">
+      @for (e of estaciones; track e.idEstacion) {
+        <div class="col-md-4 col-lg-3">
+          <div class="card shadow-sm h-100" [class]="cardBorderClass(e.estadoColor)" style="border-width: 2px;">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="card-title mb-0">{{ e.nombre }}</h6>
+                <span class="badge" [class]="badgeClass(e.estadoColor)">{{ estadoLabel(e.estadoColor) }}</span>
+              </div>
+
+              <div class="mb-2">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                  <span>Pasajeros</span>
+                  <span>{{ e.pasajerosActuales }} / {{ e.capacidadMaxima }}</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar"
+                    [class]="e.estadoColor === 'saturado' ? 'bg-danger' : e.estadoColor === 'bajo' ? 'bg-primary' : 'bg-warning'"
+                    [style.width.%]="e.porcentajeOcupacion > 100 ? 100 : e.porcentajeOcupacion">
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <span class="fs-5 fw-bold"
+                  [class]="e.estadoColor === 'saturado' ? 'text-danger' : e.estadoColor === 'bajo' ? 'text-primary' : 'text-warning'">
+                  {{ e.porcentajeOcupacion }}%
+                </span>
+              </div>
+
+              <!-- Controles manuales de pasajeros -->
+              <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
+                <button class="btn btn-outline-danger btn-sm px-2 py-0"
+                  (click)="ajustarPasajeros(e, -1)"
+                  [disabled]="e.loadingDelta || e.pasajerosActuales === 0"
+                  title="Sale 1 pasajero">
+                  <i class="bi bi-dash-lg"></i>
+                </button>
+                <span class="fw-semibold">{{ e.pasajerosActuales }}</span>
+                <button class="btn btn-outline-success btn-sm px-2 py-0"
+                  (click)="ajustarPasajeros(e, 1)"
+                  [disabled]="e.loadingDelta"
+                  title="Llega 1 pasajero">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+                @if (e.loadingDelta) {
+                  <span class="spinner-border spinner-border-sm text-secondary"></span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

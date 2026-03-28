@@ -1,0 +1,109 @@
+<div class="container-fluid py-4">
+
+  <!-- Cabecera -->
+  <div class="d-flex align-items-center mb-4">
+    <a routerLink="/roles" class="btn btn-sm btn-outline-secondary me-3">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h2 class="h4 fw-semibold mb-0">
+        <i class="bi bi-shield-check me-2 text-primary"></i>Permisos del rol
+      </h2>
+      <p class="text-muted mb-0 small">{{ nombreRol }}</p>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+    <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+    <span>Todos los usuarios con este rol heredarán automáticamente los permisos marcados. Los overrides individuales de cada usuario pueden sobreescribir estos permisos.</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg" class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ errorMsg }}</div>
+
+  <!-- Spinner -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>
+  </div>
+
+  <div *ngIf="!loading">
+
+    <!-- Resumen rápido -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card text-center border-0 bg-light">
+          <div class="card-body py-2">
+            <div class="fs-3 fw-bold text-primary">{{ permisos.length }}</div>
+            <div class="small text-muted">Total permisos</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center border-0 bg-light">
+          <div class="card-body py-2">
+            <div class="fs-3 fw-bold text-success">{{ totalAsignados }}</div>
+            <div class="small text-muted">Asignados</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulos -->
+    <div *ngFor="let modulo of modulos()" class="mb-4">
+
+      <!-- Encabezado del módulo -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center gap-2">
+          <div class="border-start border-primary border-3 ps-2">
+            <span class="fw-semibold text-uppercase text-muted small">{{ modulo }}</span>
+          </div>
+          <span class="badge bg-primary rounded-pill">{{ asignados(modulo) }}/{{ total(modulo) }}</span>
+        </div>
+        <div class="d-flex gap-1" *ngIf="puedeAsignar || puedeRevocar">
+          <button *ngIf="puedeAsignar"
+                  class="btn btn-sm btn-outline-success"
+                  (click)="asignarModulo(modulo)"
+                  title="Asignar todos">
+            <i class="bi bi-check2-all"></i>
+          </button>
+          <button *ngIf="puedeRevocar"
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="quitarModulo(modulo)"
+                  title="Quitar todos">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid de permisos -->
+      <div class="row g-2">
+        <div *ngFor="let p of agrupados[modulo]" class="col-12 col-md-6 col-xl-4">
+          <div class="card border h-100"
+               [ngClass]="p.asignado ? 'border-success bg-success bg-opacity-10' : 'border-light'">
+            <div class="card-body py-2 px-3 d-flex align-items-center justify-content-between">
+              <div>
+                <code class="small">{{ p.nombre }}</code>
+              </div>
+              <!-- Toggle switch -->
+              <div class="form-check form-switch ms-2 mb-0" *ngIf="puedeAsignar || puedeRevocar">
+                <input class="form-check-input"
+                       type="checkbox"
+                       role="switch"
+                       [checked]="p.asignado"
+                       [disabled]="(p.asignado && !puedeRevocar) || (!p.asignado && !puedeAsignar)"
+                       (change)="toggle(p)"
+                       style="cursor:pointer; width:2.5em; height:1.2em" />
+              </div>
+              <i *ngIf="!puedeAsignar && !puedeRevocar"
+                 class="bi"
+                 [ngClass]="p.asignado ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

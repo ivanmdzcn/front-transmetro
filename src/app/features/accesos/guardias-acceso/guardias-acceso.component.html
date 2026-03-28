@@ -1,0 +1,91 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center mb-4 gap-2">
+    <a routerLink="/accesos" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h4 class="mb-0">Guardias del acceso: <strong>{{ descripcionAcceso }}</strong></h4>
+  </div>
+
+  @if (errorMsg) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ errorMsg }}
+      <button type="button" class="btn-close" (click)="errorMsg=''"></button>
+    </div>
+  }
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Guardias asignados</span>
+      @if (puedeEditar) {
+        <button class="btn btn-primary btn-sm" (click)="mostrarForm = !mostrarForm">
+          <i class="bi bi-plus-lg me-1"></i>Asignar guardia
+        </button>
+      }
+    </div>
+
+    @if (mostrarForm && puedeEditar) {
+      <div class="card-body border-bottom bg-light">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-8">
+            <label class="form-label">Guardia</label>
+            <select [(ngModel)]="idGuardiaSeleccionado" class="form-select">
+              <option [ngValue]="null" disabled>Seleccione un guardia...</option>
+              @for (g of guardiasDisponibles; track g.idGuardia) {
+                <option [value]="g.idGuardia">{{ g.apellido }}, {{ g.nombre }} — {{ g.dpi }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4 d-flex gap-2">
+            <button class="btn btn-success" (click)="asignar()" [disabled]="!idGuardiaSeleccionado">
+              Guardar
+            </button>
+            <button class="btn btn-secondary" (click)="mostrarForm = false; idGuardiaSeleccionado = null">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="card-body p-0">
+      @if (loading) {
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+      } @else if (guardias.length === 0) {
+        <p class="text-center text-muted py-4 mb-0">No hay guardias asignados a este acceso.</p>
+      } @else {
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>DPI</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              @if (puedeEditar) { <th class="text-end">Acciones</th> }
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of guardias; track g.idGuardia) {
+              <tr>
+                <td>{{ g.apellido }}, {{ g.nombre }}</td>
+                <td>{{ g.dpi }}</td>
+                <td>{{ g.telefono ?? '—' }}</td>
+                <td>
+                  <span class="badge" [class]="g.activo ? 'bg-success' : 'bg-secondary'">
+                    {{ g.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                @if (puedeEditar) {
+                  <td class="text-end">
+                    <button class="btn btn-outline-danger btn-sm" (click)="quitar(g.idGuardia)">
+                      <i class="bi bi-x-lg"></i> Quitar
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>

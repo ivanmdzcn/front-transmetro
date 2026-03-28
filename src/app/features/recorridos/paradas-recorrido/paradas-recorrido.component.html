@@ -1,0 +1,229 @@
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a routerLink="/recorridos" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h4 class="mb-0"><i class="bi bi-signpost-split me-2"></i>Paradas — Recorrido #{{ idRecorrido }}</h4>
+    <button class="btn btn-sm btn-outline-secondary ms-auto" (click)="cargar()" [disabled]="loading">
+      <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+    </button>
+  </div>
+
+  @if (errorMsg) {
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+  }
+
+  <!-- Panel resultado llegada -->
+  @if (llegadaResult) {
+    <div class="alert border-2 mb-4" [class]="llegadaResult.estadoEstacion === 'saturado' ? 'alert-danger' : 'alert-success'">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <strong><i class="bi bi-bus-front me-1"></i>Bus llegó a {{ llegadaResult.nombreEstacion }}</strong>
+          <div class="mt-1 small">
+            Pasajeros en bus: <strong>{{ llegadaResult.pasajerosEnBus }}</strong> &nbsp;|&nbsp;
+            Pasajeros esperando: <strong>{{ llegadaResult.pasajerosActualesEstacion }}</strong> de <strong>{{ llegadaResult.capacidadMaximaEstacion }}</strong>
+            ({{ llegadaResult.porcentajeOcupacionEstacion }}%)
+          </div>
+          @if (llegadaResult.minutosEspera > 0) {
+            <div class="mt-1">
+              <span class="badge bg-warning text-dark">
+                <i class="bi bi-clock me-1"></i>Espera {{ llegadaResult.minutosEspera }} min extra (bus bajo ocupación — Punto 15)
+              </span>
+            </div>
+          }
+          @if (llegadaResult.alerta) {
+            <div class="mt-1 text-danger fw-semibold">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ llegadaResult.alerta }}
+            </div>
+          }
+        </div>
+        <button type="button" class="btn-close" (click)="cerrarLlegada()"></button>
+      </div>
+    </div>
+  }
+
+  <!-- Panel resultado salida -->
+  @if (salidaResult) {
+    <div class="alert alert-info mb-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <strong><i class="bi bi-arrow-right-circle me-1"></i>Bus salió de {{ salidaResult.nombreEstacion }}</strong>
+          <div class="mt-1 small">
+            Subieron: <strong>{{ salidaResult.pasajerosSuben }}</strong> &nbsp;|&nbsp;
+            Bajaron: <strong>{{ salidaResult.pasajerosBajan }}</strong> &nbsp;|&nbsp;
+            Pasajeros en bus ahora: <strong>{{ salidaResult.pasajerosEnBusSalida }}</strong> &nbsp;|&nbsp;
+            Estación quedó con: <strong>{{ salidaResult.nuevoPasajerosEstacion }}</strong> pasajeros
+          </div>
+          @if (salidaResult.siguienteEstacion) {
+            <div class="mt-1">
+              <span class="badge bg-primary">
+                <i class="bi bi-signpost-2 me-1"></i>Próxima parada: {{ salidaResult.siguienteEstacion }}
+                — {{ salidaResult.pasajerosEnBusSalida }} pasajeros a bordo
+              </span>
+            </div>
+          } @else {
+            <div class="mt-1">
+              <span class="badge bg-success"><i class="bi bi-flag-fill me-1"></i>Última parada completada</span>
+            </div>
+          }
+        </div>
+        <button type="button" class="btn-close" (click)="cerrarSalida()"></button>
+      </div>
+    </div>
+  }
+
+  <!-- Panel confirmar llegada (sin formulario) -->
+  @if (paradaLlegadaSeleccionada && !llegadaResult) {
+    <div class="card shadow-sm mb-4 border-warning">
+      <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-bus-front me-1"></i>Registrar llegada a <strong>{{ paradaLlegadaSeleccionada.nombreEstacion }}</strong></span>
+        <button type="button" class="btn-close" (click)="cerrarLlegada()"></button>
+      </div>
+      <div class="card-body">
+        @if (errorLlegada) { <div class="alert alert-danger py-2">{{ errorLlegada }}</div> }
+        <div class="alert alert-secondary py-2 mb-3">
+          <i class="bi bi-people-fill me-2"></i>
+          El bus llega con <strong>{{ paradaLlegadaSeleccionada.pasajerosEnBus }}</strong> pasajeros
+          (propagados automáticamente desde la parada anterior)
+        </div>
+        <button class="btn btn-warning" (click)="confirmarLlegada()" [disabled]="loadingLlegada">
+          @if (loadingLlegada) { <span class="spinner-border spinner-border-sm me-1"></span> }
+          <i class="bi bi-check-circle me-1"></i>Confirmar llegada
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Panel salida -->
+  @if (paradaSalidaSeleccionada && !salidaResult) {
+    <div class="card shadow-sm mb-4 border-primary">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-arrow-right-circle me-1"></i>Registrar salida de estación</span>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarSalida()"></button>
+      </div>
+      <div class="card-body">
+        @if (errorSalida) { <div class="alert alert-danger py-2">{{ errorSalida }}</div> }
+
+        <!-- Estación de origen: solo confirmar, nadie baja -->
+        @if (paradaSalidaSeleccionada.numeroParada === 1) {
+          <div class="alert alert-secondary py-2 mb-3">
+            <i class="bi bi-info-circle me-2"></i>
+            Estación de <strong>origen</strong> — el bus parte con
+            <strong>{{ paradaSalidaSeleccionada.pasajerosEnBus }}</strong> pasajeros a bordo.
+            No se registran bajas en la salida inicial.
+          </div>
+          <button class="btn btn-primary" (click)="confirmarSalidaOrigen()" [disabled]="loadingSalida">
+            @if (loadingSalida) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <i class="bi bi-check-circle me-1"></i>Confirmar salida
+          </button>
+        } @else {
+          <!-- Estaciones intermedias / destino: formulario completo -->
+          <form [formGroup]="salidaForm" (ngSubmit)="confirmarSalida()" class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Pasajeros que suben <span class="text-danger">*</span></label>
+              <input formControlName="pasajerosSuben" type="number" class="form-control" min="0"
+                [class.is-invalid]="fs['pasajerosSuben'].invalid && fs['pasajerosSuben'].touched" />
+              @if (fs['pasajerosSuben'].invalid && fs['pasajerosSuben'].touched) {
+                <div class="invalid-feedback">Ingrese un número válido.</div>
+              }
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Pasajeros que bajan <span class="text-danger">*</span></label>
+              <input formControlName="pasajerosBajan" type="number" class="form-control" min="0"
+                [class.is-invalid]="fs['pasajerosBajan'].invalid && fs['pasajerosBajan'].touched" />
+              @if (fs['pasajerosBajan'].invalid && fs['pasajerosBajan'].touched) {
+                <div class="invalid-feedback">Ingrese un número válido.</div>
+              }
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary" [disabled]="loadingSalida">
+                @if (loadingSalida) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                Confirmar salida
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Lista de paradas -->
+  @if (loading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (paradas.length === 0) {
+    <p class="text-center text-muted py-4">No hay paradas registradas para este recorrido.</p>
+  } @else {
+    <div class="row g-3">
+      @for (p of paradas; track p.idRecorridoParada) {
+        <div class="col-12">
+          <div class="card shadow-sm"
+            [class.border-warning]="p.estado === 'en_curso'"
+            [class.border-success]="p.estado === 'completado'"
+            [style.opacity]="p.estado === 'completado' ? '0.75' : '1'">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+
+                <!-- Info parada -->
+                <div class="d-flex align-items-center gap-3">
+                  <div class="text-center" style="min-width:36px">
+                    <div class="fw-bold fs-5">{{ p.numeroParada }}</div>
+                    <div class="text-muted" style="font-size:0.7rem">parada</div>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">{{ p.nombreEstacion }}</div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                      <span class="badge" [class]="estadoBadgeClass(p.estado)">{{ p.estado }}</span>
+                      @if (p.estado !== 'pendiente') {
+                        <span class="badge" [class]="estacionBadgeClass(p.estadoEstacion)">{{ p.estadoEstacion }}</span>
+                      }
+                      @if (p.minutosEspera > 0) {
+                        <span class="badge bg-warning text-dark">
+                          <i class="bi bi-clock me-1"></i>+{{ p.minutosEspera }} min
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Datos de la parada si ya pasó -->
+                @if (p.estado !== 'pendiente') {
+                  <div class="text-muted small d-flex flex-wrap gap-3">
+                    <span><i class="bi bi-people me-1"></i>En bus: <strong class="text-dark">{{ p.pasajerosEnBus }}</strong></span>
+                    @if (p.estado === 'completado') {
+                      <span><i class="bi bi-arrow-up me-1"></i>Subieron: <strong class="text-dark">{{ p.pasajerosSuben }}</strong></span>
+                      <span><i class="bi bi-arrow-down me-1"></i>Bajaron: <strong class="text-dark">{{ p.pasajerosBajan }}</strong></span>
+                    }
+                    @if (p.horaLlegada) {
+                      <span><i class="bi bi-clock me-1"></i>Llegada: {{ p.horaLlegada | date:'HH:mm' }}</span>
+                    }
+                    @if (p.horaSalida) {
+                      <span><i class="bi bi-clock-history me-1"></i>Salida: {{ p.horaSalida | date:'HH:mm' }}</span>
+                    }
+                  </div>
+                }
+
+                <!-- Botones de acción -->
+                <div class="d-flex gap-2">
+                  @if (puedeRegistrarLlegada(p)) {
+                    <button class="btn btn-warning btn-sm" (click)="abrirLlegada(p)">
+                      <i class="bi bi-bus-front me-1"></i>Llegada
+                    </button>
+                  }
+                  @if (p.estado === 'en_curso') {
+                    <button class="btn btn-primary btn-sm" (click)="abrirSalida(p)">
+                      <i class="bi bi-arrow-right-circle me-1"></i>Salida
+                    </button>
+                  }
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
