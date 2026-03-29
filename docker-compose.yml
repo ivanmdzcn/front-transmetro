@@ -1,10 +1,14 @@
 services:
   transmetro-front:
+    build:
+      context: .
     image: transmetro-front:latest
     container_name: transmetro_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${FRONT_PORT}:80"
+    environment:
+      API_PROXY_URL: ${API_PROXY_URL}
     networks:
       - mysql_net
 

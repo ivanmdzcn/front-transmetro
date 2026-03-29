@@ -2,28 +2,23 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Instalar Angular CLI globalmente para evitar el error 'ng not found'
 RUN npm install -g @angular/cli
 
-# Copiar archivos de dependencias primero para aprovechar el caché de capas
 COPY package*.json ./
 RUN npm install
 
-# Copiar el resto del código
 COPY . .
 
-# Ejecutar el build de producción
 RUN npm run build -- --configuration production
 
 # Etapa 2: Servidor de producción ligero
 FROM nginx:alpine
 
-# Copiamos la configuración de Nginx que creamos antes
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache gettext
 
-# IMPORTANTE: Ruta basada en tu angular.json
-# El nuevo builder pone los archivos en dist/pb-front/browser
 COPY --from=build /app/dist/pb-front/browser /usr/share/nginx/html
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+CMD ["/bin/sh", "-c", "envsubst '$API_PROXY_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
