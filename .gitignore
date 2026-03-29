@@ -42,4 +42,4 @@ testem.log
 Thumbs.db
 
 .env
-docker-compose.example.yml
+docker-compose.yml
