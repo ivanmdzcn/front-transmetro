@@ -76,20 +76,34 @@
               </div>
 
               <!-- Controles manuales de pasajeros -->
-              <div class="d-flex justify-content-center align-items-center gap-2 mt-3">
-                <button class="btn btn-outline-danger btn-sm px-2 py-0"
-                  (click)="ajustarPasajeros(e, -1)"
-                  [disabled]="e.loadingDelta || e.pasajerosActuales === 0"
-                  title="Sale 1 pasajero">
-                  <i class="bi bi-dash-lg"></i>
-                </button>
-                <span class="fw-semibold">{{ e.pasajerosActuales }}</span>
-                <button class="btn btn-outline-success btn-sm px-2 py-0"
-                  (click)="ajustarPasajeros(e, 1)"
-                  [disabled]="e.loadingDelta"
-                  title="Llega 1 pasajero">
-                  <i class="bi bi-plus-lg"></i>
-                </button>
+              <div class="d-flex flex-column align-items-center gap-1 mt-3">
+                <div class="d-flex justify-content-center align-items-center gap-1">
+                  <button class="btn btn-outline-danger btn-sm px-2 py-0"
+                    (click)="ajustarPasajeros(e, -10)"
+                    [disabled]="e.loadingDelta || e.pasajerosActuales === 0"
+                    title="Salen 10 pasajeros">
+                    <i class="bi bi-dash-lg"></i>10
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm px-2 py-0"
+                    (click)="ajustarPasajeros(e, -5)"
+                    [disabled]="e.loadingDelta || e.pasajerosActuales === 0"
+                    title="Salen 5 pasajeros">
+                    <i class="bi bi-dash-lg"></i>5
+                  </button>
+                  <span class="fw-semibold mx-1">{{ e.pasajerosActuales }}</span>
+                  <button class="btn btn-outline-success btn-sm px-2 py-0"
+                    (click)="ajustarPasajeros(e, 5)"
+                    [disabled]="e.loadingDelta"
+                    title="Llegan 5 pasajeros">
+                    <i class="bi bi-plus-lg"></i>5
+                  </button>
+                  <button class="btn btn-outline-success btn-sm px-2 py-0"
+                    (click)="ajustarPasajeros(e, 10)"
+                    [disabled]="e.loadingDelta"
+                    title="Llegan 10 pasajeros">
+                    <i class="bi bi-plus-lg"></i>10
+                  </button>
+                </div>
                 @if (e.loadingDelta) {
                   <span class="spinner-border spinner-border-sm text-secondary"></span>
                 }

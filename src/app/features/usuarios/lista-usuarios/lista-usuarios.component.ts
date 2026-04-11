@@ -59,11 +59,11 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
     });
   }
 
-  eliminar(id: number): void {
-    if (!confirm('¿Desea eliminar (desactivar) este usuario?')) return;
-    this.usuarioService.eliminar(id).subscribe({
-      next: () => this.cargarUsuarios(),
-      error: () => alert('Error al eliminar el usuario.')
-    });
-  }
+  // eliminar(id: number): void {
+  //   if (!confirm('¿Desea eliminar (desactivar) este usuario?')) return;
+  //   this.usuarioService.eliminar(id).subscribe({
+  //     next: () => this.cargarUsuarios(),
+  //     error: () => alert('Error al eliminar el usuario.')
+  //   });
+  // }
 }

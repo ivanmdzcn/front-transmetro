@@ -75,12 +75,12 @@
                         [title]="u.activo ? 'Desactivar' : 'Activar'">
                   <i class="bi" [ngClass]="u.activo ? 'bi-person-x' : 'bi-person-check'"></i>
                 </button>
-                <button *ngIf="puedeDesactivar"
+                <!-- <button *ngIf="puedeDesactivar"
                         class="btn btn-sm btn-outline-danger"
                         (click)="eliminar(u.id)"
                         title="Eliminar">
                   <i class="bi bi-trash"></i>
-                </button>
+                </button> -->
               </td>
             </tr>
             <tr *ngIf="usuarios.length === 0">

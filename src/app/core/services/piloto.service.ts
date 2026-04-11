@@ -40,7 +40,7 @@ export class PilotoService {
   }
 
   cambiarEstado(id: number, activo: boolean): Observable<{ mensaje: string }> {
-    return this.http.patch<{ mensaje: string }>(`${this.apiUrl}/${id}/estado`, { activo });
+    return this.http.patch<{ mensaje: string }>(`${this.apiUrl}/${id}/estado`, activo);
   }
 
   asignarBus(id: number, request: AsignarBusPilotoRequest): Observable<{ mensaje: string }> {

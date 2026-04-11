@@ -1,10 +1,11 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Observable }  from 'rxjs';
+import { Component, EventEmitter, OnInit, OnDestroy, Output } from '@angular/core';
+import { Observable, Subscription, interval } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserSession } from '../../../core/models/auth.models';
 import { ConfiguracionEmpresaService } from '../../../core/services/configuracion-empresa.service';
+import { AlertaService } from '../../../core/services/alerta.service';
 
 @Component({
   selector: 'app-header',
@@ -13,16 +14,20 @@ import { ConfiguracionEmpresaService } from '../../../core/services/configuracio
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
   @Output() toggleSidebar = new EventEmitter<void>();
 
   currentUser$!: Observable<UserSession | null>;
   nombreEmpresa = 'LM Corp';
+  alertasActivas = 0;
+
+  private alertaSub?: Subscription;
 
   constructor(
     private auth: AuthService,
-    private configSvc: ConfiguracionEmpresaService
+    private configSvc: ConfiguracionEmpresaService,
+    private alertaService: AlertaService
   ) {}
 
   ngOnInit(): void {
@@ -33,6 +38,19 @@ export class HeaderComponent implements OnInit {
           this.nombreEmpresa = cfg.nombreComercial ?? cfg.razonSocial;
         }
       }
+    });
+    this.cargarAlertas();
+    this.alertaSub = interval(60000).subscribe(() => this.cargarAlertas());
+  }
+
+  ngOnDestroy(): void {
+    this.alertaSub?.unsubscribe();
+  }
+
+  private cargarAlertas(): void {
+    this.alertaService.obtenerActivas().subscribe({
+      next: (lista) => { this.alertasActivas = lista.length; },
+      error: () => { this.alertasActivas = 0; }
     });
   }
 

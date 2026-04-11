@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReporteService } from '../../../core/services/reporte.service';
+import { BusService } from '../../../core/services/bus.service';
+import { ReporteBusesPorLineaResponse, ReporteLineasPorMunicipalidadResponse } from '../../../core/models/reporte.models';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,12 +11,56 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
 
-  summaryCards = [
-    { label: 'Usuarios activos',  value: '0', icon: 'bi-people-fill',     color: '#1a3c5e' },
-    { label: 'Reportes hoy',      value: '0', icon: 'bi-file-earmark-bar-graph', color: '#2e86c1' },
-    { label: 'Pendientes',        value: '0', icon: 'bi-hourglass-split',  color: '#f39c12' },
-    { label: 'Completados',       value: '0', icon: 'bi-check-circle-fill', color: '#27ae60' },
-  ];
+  busesPorLinea: ReporteBusesPorLineaResponse[] = [];
+  lineasPorMunicipalidad: ReporteLineasPorMunicipalidadResponse[] = [];
+
+  loadingBuses = false;
+  loadingResumen = false;
+  loadingMunicipalidades = false;
+
+  totalBusesActivos = 0;
+  totalMantenimiento = 0;
+  totalBaja = 0;
+
+  constructor(
+    private reporteService: ReporteService,
+    private busService: BusService
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarResumenBuses();
+    this.cargarBusesPorLinea();
+    this.cargarLineasPorMunicipalidad();
+  }
+
+  private cargarResumenBuses(): void {
+    this.loadingResumen = true;
+    this.busService.obtenerTodos().subscribe({
+      next: (data) => {
+        this.totalBusesActivos  = data.filter(b => b.estado === 'activo').length;
+        this.totalMantenimiento = data.filter(b => b.estado === 'mantenimiento').length;
+        this.totalBaja          = data.filter(b => b.estado === 'baja').length;
+        this.loadingResumen = false;
+      },
+      error: () => { this.loadingResumen = false; }
+    });
+  }
+
+  private cargarBusesPorLinea(): void {
+    this.loadingBuses = true;
+    this.reporteService.busesPorLinea().subscribe({
+      next: (data) => { this.busesPorLinea = data; this.loadingBuses = false; },
+      error: () => { this.loadingBuses = false; }
+    });
+  }
+
+  private cargarLineasPorMunicipalidad(): void {
+    this.loadingMunicipalidades = true;
+    this.reporteService.lineasPorMunicipalidad().subscribe({
+      next: (data) => { this.lineasPorMunicipalidad = data; this.loadingMunicipalidades = false; },
+      error: () => { this.loadingMunicipalidades = false; }
+    });
+  }
 }

@@ -78,7 +78,9 @@ export class ListaBusesComponent implements OnInit {
     if (!confirm(`¿Cambiar estado del bus ${bus.numeroUnidad} a "${estado}"?`)) return;
     this.busService.cambiarEstado(bus.idBus, estado).subscribe({
       next: () => this.cargar(),
-      error: () => alert('Error al cambiar el estado.')
+      error: (err) => {
+        this.errorMsg = err?.error?.mensaje ?? `Error ${err?.status} al cambiar el estado.`;
+      }
     });
   }
 

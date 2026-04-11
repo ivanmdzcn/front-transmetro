@@ -34,7 +34,7 @@ export class EstacionService {
   }
 
   cambiarEstado(id: number, activo: boolean): Observable<{ mensaje: string }> {
-    return this.http.patch<{ mensaje: string }>(`${this.apiUrl}/${id}/estado`, { activo });
+    return this.http.patch<{ mensaje: string }>(`${this.apiUrl}/${id}/estado`, activo);
   }
 
   obtenerMonitoreo(): Observable<MonitoreoEstacionResponse[]> {

@@ -5,30 +5,143 @@
   <span class="text-muted small">Bienvenido al sistema</span>
 </div>
 
-<!-- Tarjetas de resumen -->
+<!-- Tarjetas de resumen operativo -->
 <div class="row g-3 mb-4">
-  <div class="col-12 col-sm-6 col-xl-3" *ngFor="let card of summaryCards">
+  <div class="col-12 col-sm-4">
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body d-flex align-items-center gap-3">
-        <div class="card-icon rounded-3 p-3" [style.background]="card.color">
-          <i [class]="'bi ' + card.icon + ' fs-4 text-white'"></i>
+        <div class="rounded-3 p-3" style="background:#27ae60">
+          <i class="bi bi-bus-front-fill fs-4 text-white"></i>
         </div>
         <div>
-          <div class="text-muted small">{{ card.label }}</div>
-          <div class="fw-bold fs-4">{{ card.value }}</div>
+          <div class="text-muted small">Buses activos</div>
+          @if (loadingResumen) {
+            <div class="spinner-border spinner-border-sm text-success"></div>
+          } @else {
+            <div class="fw-bold fs-4">{{ totalBusesActivos }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="rounded-3 p-3" style="background:#f39c12">
+          <i class="bi bi-tools fs-4 text-white"></i>
+        </div>
+        <div>
+          <div class="text-muted small">En mantenimiento</div>
+          @if (loadingResumen) {
+            <div class="spinner-border spinner-border-sm text-warning"></div>
+          } @else {
+            <div class="fw-bold fs-4">{{ totalMantenimiento }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="rounded-3 p-3" style="background:#c0392b">
+          <i class="bi bi-slash-circle-fill fs-4 text-white"></i>
+        </div>
+        <div>
+          <div class="text-muted small">En baja</div>
+          @if (loadingResumen) {
+            <div class="spinner-border spinner-border-sm text-danger"></div>
+          } @else {
+            <div class="fw-bold fs-4">{{ totalBaja }}</div>
+          }
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Área de contenido (se llenará con la documentación del backend) -->
-<div class="card border-0 shadow-sm">
-  <div class="card-header bg-white border-bottom fw-semibold">
-    <i class="bi bi-clock-history me-2 text-secondary"></i>Actividad reciente
+<div class="row g-3">
+  <!-- Buses por línea -->
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-bar-chart-line me-2 text-primary"></i>Buses por línea
+      </div>
+      <div class="card-body p-0">
+        @if (loadingBuses) {
+          <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+        } @else if (busesPorLinea.length === 0) {
+          <p class="text-center text-muted py-4">Sin datos disponibles.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Línea</th>
+                  <th class="text-center">Activos</th>
+                  <th class="text-center">Mantenimiento</th>
+                  <th class="text-center">Baja</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of busesPorLinea; track r.idLinea) {
+                  <tr>
+                    <td>{{ r.nombreLinea }}</td>
+                    <td class="text-center">
+                      <span class="badge bg-success">{{ r.busesActivos }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-warning text-dark">{{ r.busesMantenimiento }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-secondary">{{ r.busesBaja }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
   </div>
-  <div class="card-body text-center py-5 text-muted">
-    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-    Este módulo se integrará con el API del backend.
+
+  <!-- Líneas por municipalidad -->
+  <div class="col-12 col-xl-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-bottom fw-semibold">
+        <i class="bi bi-geo-alt me-2 text-danger"></i>Cobertura por municipalidad
+      </div>
+      <div class="card-body p-0">
+        @if (loadingMunicipalidades) {
+          <div class="text-center py-4"><div class="spinner-border text-danger"></div></div>
+        } @else if (lineasPorMunicipalidad.length === 0) {
+          <p class="text-center text-muted py-4">Sin datos disponibles.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Municipalidad</th>
+                  <th class="text-center">Líneas</th>
+                  <th class="text-center">Buses</th>
+                  <th class="text-center">Estaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of lineasPorMunicipalidad; track r.idMunicipalidad) {
+                  <tr>
+                    <td>{{ r.nombreMunicipalidad }}</td>
+                    <td class="text-center">{{ r.totalLineas }}</td>
+                    <td class="text-center">{{ r.totalBuses }}</td>
+                    <td class="text-center">{{ r.totalEstaciones }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 </div>
